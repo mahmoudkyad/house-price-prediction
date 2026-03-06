@@ -2,6 +2,7 @@ import streamlit as st
 import joblib
 import pandas as pd
 import plotly.express as px
+import shap
 import time
 
 # =========================================
@@ -21,8 +22,6 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* خلفية AI متحركة */
-
 .stApp{
 background: linear-gradient(-45deg,#0f2027,#203a43,#2c5364,#1c92d2);
 background-size:400% 400%;
@@ -34,8 +33,6 @@ animation:gradient 12s ease infinite;
 50%{background-position:100% 50%}
 100%{background-position:0% 50%}
 }
-
-/* العناوين */
 
 .title{
 text-align:center;
@@ -52,8 +49,6 @@ color:#e2e8f0;
 margin-bottom:40px;
 }
 
-/* زرار متحرك */
-
 .stButton>button{
 background:linear-gradient(135deg,#6366f1,#3b82f6);
 color:white;
@@ -69,16 +64,12 @@ transform:scale(1.12);
 box-shadow:0px 10px 40px rgba(0,0,0,0.5);
 }
 
-/* كارت */
-
 .card{
 background:#111827;
 padding:25px;
 border-radius:18px;
 box-shadow:0 15px 40px rgba(0,0,0,0.4);
 }
-
-/* رقم السعر */
 
 .metric{
 font-size:45px;
@@ -254,42 +245,60 @@ with col2:
         st.plotly_chart(fig,use_container_width=True)
 
 # =========================================
-# Feature Importance
+# Explainable AI (SHAP)
 # =========================================
 
 with col3:
 
-    st.markdown("### Feature Importance")
+    st.markdown("### Explainable AI")
 
     try:
 
-        importance = model.feature_importances_
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(input_data)
 
-        features = [
-        "Overall Qual",
-        "Gr Liv Area",
-        "Garage Cars",
-        "Total Bsmt SF",
-        "Year Built"
-        ]
-
-        df = pd.DataFrame({
-        "Feature":features,
-        "Importance":importance
+        shap_df = pd.DataFrame({
+            "Feature":input_data.columns,
+            "Impact":shap_values[0]
         })
 
-        fig2 = px.bar(
-            df,
-            x="Importance",
+        fig3 = px.bar(
+            shap_df,
+            x="Impact",
             y="Feature",
             orientation="h"
         )
 
-        st.plotly_chart(fig2,use_container_width=True)
+        st.plotly_chart(fig3,use_container_width=True)
 
     except:
 
-        st.info("Feature importance unavailable.")
+        st.info("SHAP explanation unavailable")
+
+# =========================================
+# AI Assistant
+# =========================================
+
+st.markdown("---")
+
+st.subheader("🤖 AI Assistant")
+
+st.markdown(
+"""
+<a href="https://chat.openai.com" target="_blank">
+<button style="
+background:linear-gradient(90deg,#10b981,#06b6d4);
+color:white;
+padding:15px 30px;
+border:none;
+border-radius:10px;
+font-size:18px;">
+Open AI Chat Assistant
+</button>
+</a>
+""",
+unsafe_allow_html=True
+)
 
 # =========================================
 # Footer
