@@ -12,7 +12,36 @@ st.set_page_config(
     page_icon="🏠",
     layout="wide"
 )
+# ===============================
+# Start Button State
+# ===============================
 
+if "started" not in st.session_state:
+    st.session_state.started = False
+
+# ===============================
+# Start Screen
+# ===============================
+
+if not st.session_state.started:
+
+    st.title("🏠 AI House Price Prediction")
+
+    st.write("Welcome to the AI Real Estate Prediction System")
+
+    if st.button("Start"):
+
+        st.session_state.started = True
+        st.rerun()
+
+    st.stop()
+    # ===============================
+# Intro Video
+# ===============================
+
+st.video("intro.mp4")
+
+st.markdown("---")
 # ==================================
 # Custom CSS
 # ==================================
@@ -213,3 +242,4 @@ st.markdown("---")
 st.write(
 "AI Real Estate Prediction System | Machine Learning Project"
 )
+
