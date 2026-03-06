@@ -93,13 +93,13 @@ if "page" not in st.session_state:
 
 if st.session_state.page == "start":
 
-    st.markdown('<div class="title">🏠 AI House Price Prediction</div>',unsafe_allow_html=True)
+    st.markdown('<div class="title"> AI House Price Prediction</div>',unsafe_allow_html=True)
     st.markdown('<div class="subtitle">Predict Real Estate Prices Using Machine Learning</div>',unsafe_allow_html=True)
 
     col1,col2,col3 = st.columns([1,1,1])
 
     with col2:
-        if st.button("🚀 Start AI System"):
+        if st.button(" Start AI System"):
             st.session_state.page = "video"
             st.rerun()
 
@@ -154,7 +154,7 @@ model = joblib.load("house_price_mode55.pkl")
 # HERO
 # =========================================
 
-st.title("🏡 AI Real Estate Prediction System")
+st.title(" AI Real Estate Prediction System")
 
 st.write("Enter property features to estimate the house price")
 
@@ -214,7 +214,7 @@ with col2:
 
     })
 
-    if st.button("💰 Predict Price"):
+    if st.button("$ Predict Price"):
 
         prediction = model.predict(input_data)[0]
 
@@ -307,3 +307,4 @@ unsafe_allow_html=True
 st.markdown("---")
 
 st.write("AI Real Estate Prediction System | Machine Learning Graduation Project")
+
