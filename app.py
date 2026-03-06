@@ -12,18 +12,16 @@ st.set_page_config(
     page_icon="🏠",
     layout="wide"
 )
-# ===============================
-# Start Button State
-# ===============================
+import time
 
-if "started" not in st.session_state:
-    st.session_state.started = False
+# حالة البداية
+if "page" not in st.session_state:
+    st.session_state.page = "start"
+    # ==============================
+# Start Page
+# ==============================
 
-# ===============================
-# Start Screen
-# ===============================
-
-if not st.session_state.started:
+if st.session_state.page == "start":
 
     st.title("🏠 AI House Price Prediction")
 
@@ -31,17 +29,31 @@ if not st.session_state.started:
 
     if st.button("Start"):
 
-        st.session_state.started = True
+        st.session_state.page = "video"
         st.rerun()
 
     st.stop()
-    # ===============================
-# Intro Video
-# ===============================
+    # ==============================
+# Video Page
+# ==============================
 
-st.video("intro.mp4")
+if st.session_state.page == "video":
 
-st.markdown("---")
+    st.markdown(
+    """
+    <video autoplay muted width="100%">
+        <source src="intro.mp4" type="video/mp4">
+    </video>
+    """,
+    unsafe_allow_html=True
+    )
+
+    time.sleep(6)  # مدة الفيديو
+
+    st.session_state.page = "app"
+    st.rerun()
+
+    st.stop()
 # ==================================
 # Custom CSS
 # ==================================
@@ -242,4 +254,5 @@ st.markdown("---")
 st.write(
 "AI Real Estate Prediction System | Machine Learning Project"
 )
+
 
