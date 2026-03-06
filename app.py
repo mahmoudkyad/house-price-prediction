@@ -83,50 +83,54 @@ color:#22c55e;
 # =====================================
 
 if "page" not in st.session_state:
-    st.session_state.page="start"
+    st.session_state.page = "start"
 
 # =====================================
 # START PAGE
 # =====================================
 
-if st.session_state.page=="start":
+if st.session_state.page == "start":
 
-    st.markdown('<div class="title">🏠 AI House Price Prediction</div>',unsafe_allow_html=True)
+    st.markdown('<div class="title">🏠 AI House Price Prediction</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Machine Learning Real Estate System</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="subtitle">Machine Learning Real Estate System</div>',unsafe_allow_html=True)
-
-    col1,col2,col3=st.columns([1,1,1])
+    col1, col2, col3 = st.columns([1,1,1])
 
     with col2:
         if st.button("🚀 Start System"):
-            st.session_state.page="video"
+            st.session_state.page = "video"
             st.rerun()
 
     st.stop()
 
 # =====================================
-# VIDEO PAGE (AUTOPLAY FIXED)
+# VIDEO PAGE (AUTOPLAY)
 # =====================================
 
-if st.session_state.page=="video":
+if st.session_state.page == "video":
 
-    video_file = open("intro.mp4","rb").read()
-    video_base64 = base64.b64encode(video_file).decode()
+    try:
+        with open("intro.mp4", "rb") as f:
+            video_bytes = f.read()
+        video_base64 = base64.b64encode(video_bytes).decode()
 
-    st.markdown(
-    f"""
-    <video autoplay muted width="100%">
-        <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
-    </video>
-    """,
-    unsafe_allow_html=True
-    )
+        st.markdown(
+            f"""
+            <video width="100%" autoplay muted playsinline>
+                <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
+            </video>
+            """,
+            unsafe_allow_html=True
+        )
 
+    except:
+        st.error("Video file not found. Make sure intro.mp4 is in the project folder.")
+
+    # مدة الفيديو
     time.sleep(6)
 
-    st.session_state.page="app"
+    st.session_state.page = "app"
     st.rerun()
-
     st.stop()
 
 # =====================================
@@ -140,14 +144,13 @@ model = joblib.load("house_price_mode55.pkl")
 # =====================================
 
 st.title("🏡 AI Real Estate Prediction System")
-
 st.write("Enter house features to predict the price")
 
 # =====================================
 # Layout
 # =====================================
 
-col1,col2,col3=st.columns([1,1,1])
+col1, col2, col3 = st.columns([1,1,1])
 
 # =====================================
 # INPUT
@@ -157,15 +160,11 @@ with col1:
 
     st.markdown("### Property Features")
 
-    OverallQual=st.slider("Overall Quality",1,10,5)
-
-    GrLivArea=st.number_input("Living Area",500,5000,1500)
-
-    GarageCars=st.slider("Garage Capacity",0,4,2)
-
-    TotalBsmtSF=st.number_input("Basement Area",0,3000,800)
-
-    YearBuilt=st.slider("Year Built",1900,2024,2000)
+    OverallQual = st.slider("Overall Quality",1,10,5)
+    GrLivArea = st.number_input("Living Area",500,5000,1500)
+    GarageCars = st.slider("Garage Capacity",0,4,2)
+    TotalBsmtSF = st.number_input("Basement Area",0,3000,800)
+    YearBuilt = st.slider("Year Built",1900,2024,2000)
 
 # =====================================
 # Prediction
@@ -175,19 +174,19 @@ with col2:
 
     st.markdown("### Prediction Result")
 
-    input_data=pd.DataFrame({
+    input_data = pd.DataFrame({
 
-    "Overall Qual":[OverallQual],
-    "Gr Liv Area":[GrLivArea],
-    "Garage Cars":[GarageCars],
-    "Total Bsmt SF":[TotalBsmtSF],
-    "Year Built":[YearBuilt]
+        "Overall Qual":[OverallQual],
+        "Gr Liv Area":[GrLivArea],
+        "Garage Cars":[GarageCars],
+        "Total Bsmt SF":[TotalBsmtSF],
+        "Year Built":[YearBuilt]
 
     })
 
     if st.button("💰 Predict Price"):
 
-        prediction=model.predict(input_data)[0]
+        prediction = model.predict(input_data)[0]
 
         st.markdown(
         f"""
@@ -199,15 +198,12 @@ with col2:
         unsafe_allow_html=True
         )
 
-        df_price=pd.DataFrame({
-
-        "Type":["Prediction"],
-        "Price":[prediction]
-
+        df_price = pd.DataFrame({
+            "Type":["Prediction"],
+            "Price":[prediction]
         })
 
-        fig=px.bar(df_price,x="Type",y="Price",color="Type")
-
+        fig = px.bar(df_price,x="Type",y="Price",color="Type")
         st.plotly_chart(fig,use_container_width=True)
 
 # =====================================
@@ -220,23 +216,18 @@ with col3:
 
     try:
 
-        explainer=shap.TreeExplainer(model)
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(input_data)
 
-        shap_values=explainer.shap_values(input_data)
-
-        df=pd.DataFrame({
-
-        "Feature":input_data.columns,
-        "Impact":shap_values[0]
-
+        df = pd.DataFrame({
+            "Feature":input_data.columns,
+            "Impact":shap_values[0]
         })
 
-        fig2=px.bar(df,x="Impact",y="Feature",orientation="h")
-
+        fig2 = px.bar(df,x="Impact",y="Feature",orientation="h")
         st.plotly_chart(fig2,use_container_width=True)
 
     except:
-
         st.info("SHAP explanation unavailable")
 
 # =====================================
@@ -246,8 +237,6 @@ with col3:
 st.markdown("---")
 
 st.subheader("🤖 AI Assistant")
-
-st.write("Click the button to chat with AI")
 
 st.markdown(
 """
@@ -272,5 +261,4 @@ unsafe_allow_html=True
 # =====================================
 
 st.markdown("---")
-
 st.write("AI Real Estate Prediction System | Machine Learning Project")
