@@ -1,258 +1,134 @@
 import streamlit as st
-import joblib
-import pandas as pd
-import plotly.express as px
-
-# ==================================
-# Page Config
-# ==================================
-
-st.set_page_config(
-    page_title="AI House Price Predictor",
-    page_icon="🏠",
-    layout="wide"
-)
 import time
 
-# حالة البداية
-if "page" not in st.session_state:
-    st.session_state.page = "start"
-    # ==============================
-# Start Page
-# ==============================
+# --------------------------------
+# Page Config
+# --------------------------------
+st.set_page_config(
+    page_title="AI House Price Prediction",
+    page_icon="🤖",
+    layout="wide"
+)
 
-if st.session_state.page == "start":
-
-    st.title("🏠 AI House Price Prediction")
-
-    st.write("Welcome to the AI Real Estate Prediction System")
-
-    if st.button("Start"):
-
-        st.session_state.page = "video"
-        st.rerun()
-
-    st.stop()
-    # ==============================
-# Video Page
-# ==============================
-
-if st.session_state.page == "video":
-
-    st.markdown(
-    """
-    <video autoplay muted width="100%">
-        <source src="intro.mp4" type="video/mp4">
-    </video>
-    """,
-    unsafe_allow_html=True
-    )
-
-    time.sleep(6)  # مدة الفيديو
-
-    st.session_state.page = "app"
-    st.rerun()
-
-    st.stop()
-# ==================================
-# Custom CSS
-# ==================================
-
+# --------------------------------
+# Background + Button Animation
+# --------------------------------
 st.markdown("""
 <style>
 
-.main {
-background-color:#0b1120;
+/* خلفية متحركة */
+.stApp {
+background: linear-gradient(-45deg,#1e3c72,#2a5298,#6dd5ed,#2193b0);
+background-size: 400% 400%;
+animation: gradient 15s ease infinite;
 }
 
-.block-container{
-padding-top:2rem;
+@keyframes gradient {
+0%{background-position:0% 50%}
+50%{background-position:100% 50%}
+100%{background-position:0% 50%}
 }
 
-h1,h2,h3{
+/* زرار متحرك */
+.stButton > button {
+background: linear-gradient(135deg,#00c6ff,#0072ff);
 color:white;
-}
-
-p{
-color:#cbd5e1;
-}
-
-.card{
-background:#111827;
-padding:25px;
-border-radius:16px;
-box-shadow:0 10px 30px rgba(0,0,0,0.4);
-}
-
-.metric{
-font-size:40px;
+padding:18px 45px;
+border-radius:15px;
+font-size:22px;
 font-weight:bold;
-color:#22c55e;
-}
-
-.stButton>button{
-
-background:linear-gradient(90deg,#3b82f6,#6366f1);
-color:white;
-font-size:18px;
-border-radius:12px;
-padding:12px 28px;
 border:none;
-
+transition:0.3s;
 }
 
-.stButton>button:hover{
+.stButton > button:hover{
+transform:scale(1.1);
+box-shadow:0px 10px 30px rgba(0,0,0,0.4);
+}
 
-background:linear-gradient(90deg,#2563eb,#4f46e5);
+/* عنوان */
+.title{
+text-align:center;
+font-size:60px;
+font-weight:bold;
+color:white;
+margin-top:100px;
+}
 
+.subtitle{
+text-align:center;
+font-size:25px;
+color:white;
+margin-bottom:50px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ==================================
-# Load Model
-# ==================================
+# --------------------------------
+# Session State
+# --------------------------------
+if "start" not in st.session_state:
+    st.session_state.start=False
 
-model = joblib.load("house_price_mode55.pkl")
+if "video_done" not in st.session_state:
+    st.session_state.video_done=False
 
-# ==================================
-# HERO IMAGE
-# ==================================
+# --------------------------------
+# الصفحة الأولى
+# --------------------------------
+if not st.session_state.start:
 
-st.image("hero.png", use_container_width=True)
+    st.markdown('<div class="title">🏠 AI House Price Prediction</div>',unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Predict house prices using Artificial Intelligence</div>',unsafe_allow_html=True)
 
-st.markdown("##")
+    col1,col2,col3=st.columns([1,1,1])
 
-# ==================================
-# Layout
-# ==================================
+    with col2:
+        if st.button("START"):
+            st.session_state.start=True
+            st.rerun()
 
-col1,col2,col3 = st.columns([1,1,1])
+# --------------------------------
+# الفيديو
+# --------------------------------
+elif st.session_state.start and not st.session_state.video_done:
 
-# ==================================
-# INPUT CARD
-# ==================================
+    st.title("🎬 AI Introduction")
 
-with col1:
+    video_file = open("intro.mp4","rb")
+    video_bytes = video_file.read()
 
-    st.markdown("### Property Features")
+    st.video(video_bytes, autoplay=True)
 
-    OverallQual = st.slider("Overall Quality",1,10,5)
+    time.sleep(6)
 
-    GrLivArea = st.number_input(
-        "Living Area (sq ft)",
-        500,5000,1500
-    )
+    st.session_state.video_done=True
+    st.rerun()
 
-    GarageCars = st.slider(
-        "Garage Capacity",
-        0,4,2
-    )
+# --------------------------------
+# واجهة التنبؤ
+# --------------------------------
+else:
 
-    TotalBsmtSF = st.number_input(
-        "Basement Area",
-        0,3000,800
-    )
+    st.title("🏡 House Price Prediction")
 
-    YearBuilt = st.slider(
-        "Year Built",
-        1900,2024,2000
-    )
+    st.write("Enter house features")
 
-# ==================================
-# Prediction Card
-# ==================================
+    col1,col2=st.columns(2)
 
-with col2:
+    with col1:
+        GrLivArea = st.number_input("Living Area",500,5000,1500)
+        OverallQual = st.slider("Overall Quality",1,10,5)
+        GarageCars = st.slider("Garage Capacity",0,4,2)
 
-    st.markdown("### Prediction Result")
+    with col2:
+        TotalBsmtSF = st.number_input("Basement Area",0,3000,800)
+        YearBuilt = st.number_input("Year Built",1900,2025,2005)
 
-    input_data = pd.DataFrame({
+    if st.button("🔮 Predict Price"):
 
-    "Overall Qual":[OverallQual],
-    "Gr Liv Area":[GrLivArea],
-    "Garage Cars":[GarageCars],
-    "Total Bsmt SF":[TotalBsmtSF],
-    "Year Built":[YearBuilt]
+        # مثال فقط للتجربة
+        price = (GrLivArea*120)+(OverallQual*10000)+(GarageCars*5000)
 
-    })
-
-    if st.button("💰 Predict Price"):
-
-        prediction = model.predict(input_data)[0]
-
-        st.markdown(
-        f"""
-        <div class="card">
-        <h3>Estimated House Price</h3>
-        <div class="metric">${int(prediction):,}</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-        )
-
-        price_data = pd.DataFrame({
-
-        "Type":["Predicted Price"],
-        "Price":[prediction]
-
-        })
-
-        fig = px.bar(
-            price_data,
-            x="Type",
-            y="Price",
-            color="Type"
-        )
-
-        st.plotly_chart(fig,use_container_width=True)
-
-# ==================================
-# Feature Importance
-# ==================================
-
-with col3:
-
-    st.markdown("### Feature Importance")
-
-    try:
-
-        importance = model.feature_importances_
-
-        features = [
-        "Overall Qual",
-        "Gr Liv Area",
-        "Garage Cars",
-        "Total Bsmt SF",
-        "Year Built"
-        ]
-
-        df = pd.DataFrame({
-        "Feature":features,
-        "Importance":importance
-        })
-
-        fig2 = px.bar(
-            df,
-            x="Importance",
-            y="Feature",
-            orientation="h"
-        )
-
-        st.plotly_chart(fig2,use_container_width=True)
-
-    except:
-        st.info("Feature importance unavailable.")
-
-# ==================================
-# Footer
-# ==================================
-
-st.markdown("---")
-
-st.write(
-"AI Real Estate Prediction System | Machine Learning Project"
-)
-
-
+        st.success(f"💰 Predicted Price: ${price:,.0f}")
