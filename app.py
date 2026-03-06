@@ -1,171 +1,215 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
 
-# ==============================
+# ==================================
 # Page Config
-# ==============================
+# ==================================
 
 st.set_page_config(
-    page_title="House Price Predictor",
+    page_title="AI House Price Predictor",
     page_icon="🏠",
     layout="wide"
 )
 
-# ==============================
+# ==================================
+# Custom CSS
+# ==================================
+
+st.markdown("""
+<style>
+
+.main {
+background-color:#0b1120;
+}
+
+.block-container{
+padding-top:2rem;
+}
+
+h1,h2,h3{
+color:white;
+}
+
+p{
+color:#cbd5e1;
+}
+
+.card{
+background:#111827;
+padding:25px;
+border-radius:16px;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.metric{
+font-size:40px;
+font-weight:bold;
+color:#22c55e;
+}
+
+.stButton>button{
+
+background:linear-gradient(90deg,#3b82f6,#6366f1);
+color:white;
+font-size:18px;
+border-radius:12px;
+padding:12px 28px;
+border:none;
+
+}
+
+.stButton>button:hover{
+
+background:linear-gradient(90deg,#2563eb,#4f46e5);
+
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ==================================
 # Load Model
-# ==============================
+# ==================================
 
 model = joblib.load("house_price_mode55.pkl")
 
-# ==============================
-# Title
-# ==============================
+# ==================================
+# HERO IMAGE
+# ==================================
 
-st.title("🏠 House Price Prediction")
-st.write("Enter house features to estimate the price")
+st.image("hero.png", use_container_width=True)
 
-# ==============================
-# Input Section
-# ==============================
+st.markdown("##")
 
-st.sidebar.header("Property Details")
+# ==================================
+# Layout
+# ==================================
 
-OverallQual = st.sidebar.slider(
-    "Overall Quality",
-    1,10,5
-)
+col1,col2,col3 = st.columns([1,1,1])
 
-GrLivArea = st.sidebar.number_input(
-    "Living Area (sq ft)",
-    500,5000,1500
-)
+# ==================================
+# INPUT CARD
+# ==================================
 
-GarageCars = st.sidebar.slider(
-    "Garage Capacity",
-    0,4,2
-)
+with col1:
 
-TotalBsmtSF = st.sidebar.number_input(
-    "Basement Area",
-    0,3000,800
-)
+    st.markdown("### Property Features")
 
-YearBuilt = st.sidebar.slider(
-    "Year Built",
-    1900,2024,2000
-)
+    OverallQual = st.slider("Overall Quality",1,10,5)
 
-# ==============================
-# Create DataFrame
-# ==============================
-
-input_data = pd.DataFrame({
-
-"Overall Qual":[OverallQual],
-"Gr Liv Area":[GrLivArea],
-"Garage Cars":[GarageCars],
-"Total Bsmt SF":[TotalBsmtSF],
-"Year Built":[YearBuilt]
-
-})
-# =========================================
-# Input Validation
-# =========================================
-
-warnings = []
-
-# Living Area validation
-if GrLivArea > 4500:
-    warnings.append(
-        "⚠️ Living Area is outside the typical range of the training dataset."
+    GrLivArea = st.number_input(
+        "Living Area (sq ft)",
+        500,5000,1500
     )
 
-# Basement validation
-if TotalBsmtSF > 2000:
-    warnings.append(
-        "⚠️ Basement Area is higher than most values observed in the dataset."
+    GarageCars = st.slider(
+        "Garage Capacity",
+        0,4,2
     )
 
-# Year validation
-if YearBuilt > 2023:
-    warnings.append(
-        "⚠️ Year Built is outside the range used during model training."
+    TotalBsmtSF = st.number_input(
+        "Basement Area",
+        0,3000,800
     )
 
-# Display warnings
-for message in warnings:
-    st.warning(message)
-# ==============================
-# Prediction
-# ==============================
+    YearBuilt = st.slider(
+        "Year Built",
+        1900,2024,2000
+    )
 
-if st.button("Predict Price 💰"):
+# ==================================
+# Prediction Card
+# ==================================
 
-    prediction = model.predict(input_data)[0]
+with col2:
 
-    st.success(f"💰 Estimated House Price: ${int(prediction):,}")
+    st.markdown("### Prediction Result")
 
-    # ==============================
-    # Chart
-    # ==============================
+    input_data = pd.DataFrame({
 
-    fig, ax = plt.subplots()
+    "Overall Qual":[OverallQual],
+    "Gr Liv Area":[GrLivArea],
+    "Garage Cars":[GarageCars],
+    "Total Bsmt SF":[TotalBsmtSF],
+    "Year Built":[YearBuilt]
 
-    ax.bar(["Predicted Price"], [prediction])
+    })
 
-    ax.set_ylabel("Price ($)")
-    ax.set_title("Predicted House Price")
+    if st.button("💰 Predict Price"):
 
-    st.pyplot(fig)
+        prediction = model.predict(input_data)[0]
 
-# ==============================
+        st.markdown(
+        f"""
+        <div class="card">
+        <h3>Estimated House Price</h3>
+        <div class="metric">${int(prediction):,}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+        )
+
+        price_data = pd.DataFrame({
+
+        "Type":["Predicted Price"],
+        "Price":[prediction]
+
+        })
+
+        fig = px.bar(
+            price_data,
+            x="Type",
+            y="Price",
+            color="Type"
+        )
+
+        st.plotly_chart(fig,use_container_width=True)
+
+# ==================================
 # Feature Importance
-# ==============================
+# ==================================
 
-st.subheader("📊 Feature Importance")
+with col3:
 
-try:
+    st.markdown("### Feature Importance")
 
-    importance = model.feature_importances_
+    try:
 
-    features = [
+        importance = model.feature_importances_
+
+        features = [
         "Overall Qual",
         "Gr Liv Area",
         "Garage Cars",
         "Total Bsmt SF",
         "Year Built"
-    ]
+        ]
 
-    importance_df = pd.DataFrame({
+        df = pd.DataFrame({
         "Feature":features,
         "Importance":importance
-    })
+        })
 
-    importance_df = importance_df.sort_values(
-        by="Importance",
-        ascending=False
-    )
+        fig2 = px.bar(
+            df,
+            x="Importance",
+            y="Feature",
+            orientation="h"
+        )
 
-    fig2, ax2 = plt.subplots()
+        st.plotly_chart(fig2,use_container_width=True)
 
-    ax2.barh(
-        importance_df["Feature"],
-        importance_df["Importance"]
-    )
+    except:
+        st.info("Feature importance unavailable.")
 
-    ax2.set_title("Feature Importance")
-
-    st.pyplot(fig2)
-
-except:
-    st.info("Feature importance not available for this model.")
-
-# ==============================
+# ==================================
 # Footer
-# ==============================
+# ==================================
 
 st.markdown("---")
 
-st.write("Machine Learning House Price Prediction Project")
+st.write(
+"AI Real Estate Prediction System | Machine Learning Project"
+)
