@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import shap
 import time
+import base64
 
 # =====================================
 # Page Config
@@ -104,15 +105,18 @@ if st.session_state.page=="start":
     st.stop()
 
 # =====================================
-# VIDEO PAGE
+# VIDEO PAGE (AUTOPLAY FIXED)
 # =====================================
 
 if st.session_state.page=="video":
 
+    video_file = open("intro.mp4","rb").read()
+    video_base64 = base64.b64encode(video_file).decode()
+
     st.markdown(
-    """
+    f"""
     <video autoplay muted width="100%">
-        <source src="intro.mp4" type="video/mp4">
+        <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
     </video>
     """,
     unsafe_allow_html=True
@@ -243,7 +247,7 @@ st.markdown("---")
 
 st.subheader("🤖 AI Assistant")
 
-st.write("Click the button to chat with AI about house prices")
+st.write("Click the button to chat with AI")
 
 st.markdown(
 """
