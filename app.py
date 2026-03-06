@@ -70,7 +70,33 @@ input_data = pd.DataFrame({
 "Year Built":[YearBuilt]
 
 })
+# =========================================
+# Input Validation
+# =========================================
 
+warnings = []
+
+# Living Area validation
+if GrLivArea > 4500:
+    warnings.append(
+        "⚠️ Living Area is outside the typical range of the training dataset."
+    )
+
+# Basement validation
+if TotalBsmtSF > 2000:
+    warnings.append(
+        "⚠️ Basement Area is higher than most values observed in the dataset."
+    )
+
+# Year validation
+if YearBuilt > 2023:
+    warnings.append(
+        "⚠️ Year Built is outside the range used during model training."
+    )
+
+# Display warnings
+for message in warnings:
+    st.warning(message)
 # ==============================
 # Prediction
 # ==============================
@@ -141,4 +167,5 @@ except:
 # ==============================
 
 st.markdown("---")
+
 st.write("Machine Learning House Price Prediction Project")
